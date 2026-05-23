@@ -2,8 +2,6 @@
 
 Практический плейбук по архитектуре и производительности в 1C-Битрикс: DDD, Vertical Slice, SOLID и инженерные подходы к оптимизации.
 
-[English version](./README_EN.md)
-
 ## Для кого этот репозиторий
 
 - Backend-разработчики на PHP/1C-Битрикс (middle/senior)
@@ -18,7 +16,7 @@
 
 ### 2) Производительность и диагностика
 - [Производительность 1C-Битрикс на практике: 10 системных ошибок и как их устранять](./bitrix-performance-optimization-10-mistakes-practical-guide-ru.md)
-- [D7 ORM в 1C-Битрикс без иллюзий: как писать быстрые запросы, а не красивый тормоз](./bitrix-d7-orm-performance-runtime-relations-practical-guide-ru.md)
+- [D7 ORM в 1C-Битрикс на production: как писать быстрый код, а не красивую деградацию](./bitrix-d7-orm-performance-runtime-relations-practical-guide-ru.md)
 
 ## Подход в статьях
 
@@ -37,12 +35,50 @@
 1. Начать с SOLID/KISS/YAGNI для выравнивания инженерных принципов.
 2. Перейти к Vertical Slice + DDD для структуры фич и границ слоёв.
 3. Закрепить на статье по производительности с метриками и диагностиками.
+4. Углубиться в D7 ORM статью по runtime relation, JOIN и индексам.
 
 ## Ключевые темы
 
-`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `solid-principles`, `clean-code`, `performance-optimization`
+`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `solid-principles`, `clean-code`, `performance-optimization`, `d7-orm`, `mysql-indexes`, `runtime-relations`
 
 ## Где меня найти
 
 - Telegram-канал: [@murad_pro_it](https://t.me/murad_pro_it)
+- Instagram: [@murad__it](https://www.instagram.com/murad__it/)
+
+---
+
+## English
+
+Practical playbook on 1C-Bitrix architecture and performance: DDD, Vertical Slice, SOLID, and production-grade optimization patterns.
+
+### Who This Repository Is For
+
+- PHP/1C-Bitrix backend developers (middle/senior)
+- Tech leads and solution architects
+- Teams that need predictable code quality and performance growth
+
+### Contents
+
+#### 1) Architecture Principles in Bitrix
+- [SOLID, KISS and YAGNI in 1C-Bitrix: Practical Guide (RU)](./bitrix-solid-kiss-yagni-practical-guide-ru.md)
+- [Vertical Slice and DDD in 1C-Bitrix: Practical Architecture (RU)](./bitrix-vertical-slice-ddd-practical-guide-ru.md)
+
+#### 2) Performance and Diagnostics
+- [1C-Bitrix Performance in Practice: 10 Systemic Mistakes and How to Fix Them (RU)](./bitrix-performance-optimization-10-mistakes-practical-guide-ru.md)
+- [D7 ORM in 1C-Bitrix Production: Fast Queries, Runtime Relations, JOIN Strategy, and MySQL Indexing (RU)](./bitrix-d7-orm-performance-runtime-relations-practical-guide-ru.md)
+
+### Article Approach
+
+- Production value over abstract theory.
+- Professional D7-oriented examples (ORM, service layer, robust caching).
+- Clear flow in every chapter: symptom -> root cause -> solution -> verification.
+
+### Topics
+
+`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `clean-code`, `performance-optimization`, `d7-orm`, `mysql-indexes`, `runtime-relations`
+
+### Connect
+
+- Telegram: [@murad_pro_it](https://t.me/murad_pro_it)
 - Instagram: [@murad__it](https://www.instagram.com/murad__it/)
