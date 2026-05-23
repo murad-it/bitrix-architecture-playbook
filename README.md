@@ -6,6 +6,7 @@
 
 1. [SOLID, KISS и YAGNI в 1C-Битрикс: практическое руководство](./bitrix-solid-kiss-yagni-practical-guide-ru.md)
 2. [Vertical Slice и DDD в 1C-Битрикс: практическая архитектура](./bitrix-vertical-slice-ddd-practical-guide-ru.md)
+3. [Оптимизация производительности 1C-Битрикс: 10 частых ошибок и быстрые исправления](./bitrix-performance-optimization-10-mistakes-practical-guide-ru.md)
 
 ## Ключевые темы
 
