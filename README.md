@@ -17,6 +17,7 @@
 ### 2) Производительность и диагностика
 - [Производительность 1C-Битрикс на практике: 10 системных ошибок и как их устранять](./bitrix-performance-optimization-10-mistakes-practical-guide-ru.md)
 - [D7 ORM в 1C-Битрикс на production: как писать быстрый код, а не красивую деградацию](./bitrix-d7-orm-performance-runtime-relations-practical-guide-ru.md)
+- [Кеширование в 1C-Битрикс на production: полная практическая система](./bitrix-caching-complete-practical-guide-ru.md)
 
 ## Подход в статьях
 
@@ -36,10 +37,11 @@
 2. Перейти к Vertical Slice + DDD для структуры фич и границ слоёв.
 3. Закрепить на статье по производительности с метриками и диагностиками.
 4. Углубиться в D7 ORM статью по runtime relation, JOIN и индексам.
+5. Закрыть системную тему кеширования на уровне production-архитектуры.
 
 ## Ключевые темы
 
-`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `solid-principles`, `clean-code`, `performance-optimization`, `d7-orm`, `mysql-indexes`, `runtime-relations`
+`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `solid-principles`, `clean-code`, `performance-optimization`, `d7-orm`, `mysql-indexes`, `runtime-relations`, `bitrix-cache`, `managed-cache`, `tagged-cache`
 
 ## Где меня найти
 
@@ -67,6 +69,7 @@ Practical playbook on 1C-Bitrix architecture and performance: DDD, Vertical Slic
 #### 2) Performance and Diagnostics
 - [1C-Bitrix Performance in Practice: 10 Systemic Mistakes and How to Fix Them (RU)](./bitrix-performance-optimization-10-mistakes-practical-guide-ru.md)
 - [D7 ORM in 1C-Bitrix Production: Fast Queries, Runtime Relations, JOIN Strategy, and MySQL Indexing (RU)](./bitrix-d7-orm-performance-runtime-relations-practical-guide-ru.md)
+- [1C-Bitrix Caching in Production: Complete Practical System (RU)](./bitrix-caching-complete-practical-guide-ru.md)
 
 ### Article Approach
 
@@ -76,7 +79,7 @@ Practical playbook on 1C-Bitrix architecture and performance: DDD, Vertical Slic
 
 ### Topics
 
-`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `clean-code`, `performance-optimization`, `d7-orm`, `mysql-indexes`, `runtime-relations`
+`1c-bitrix`, `bitrix`, `php`, `backend`, `software-architecture`, `ddd`, `domain-driven-design`, `vertical-slice`, `clean-code`, `performance-optimization`, `d7-orm`, `mysql-indexes`, `runtime-relations`, `bitrix-cache`, `managed-cache`, `tagged-cache`
 
 ### Connect
 
