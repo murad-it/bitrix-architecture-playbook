@@ -9,14 +9,14 @@
 
 ## Введение: о чём на самом деле спорят, когда говорят «у нас тормозит Bitrix»
 
-На production «тормозит» почти никогда не является одной проблемой. Обычно это комбинация:
+На production «тормозит» почти никогда не одна проблема. Обычно это комбинация:
 
 1. Избыточной нагрузки на БД (много запросов, плохие планы, отсутствие индексов).
 2. Неправильной организации чтения данных в PHP (N+1, дубли выборок, лишние преобразования).
 3. Неконтролируемых внешних зависимостей (HTTP-интеграции без дедупликации и таймаутов).
 4. Несогласованного кэширования (кэш есть, но политика инвалидации не соответствует бизнес-событиям).
 
-Практический принцип один: сначала фиксируем baseline, затем меняем только одно узкое место, затем повторно измеряем.
+Практический принцип один: фиксируем baseline, меняем одно узкое место, повторно измеряем. Так мы понимаем, что сработало, а что было шумом.
 
 ---
 
@@ -43,37 +43,52 @@
 
 Внутри цикла по элементам выполняются отдельные обращения за ценами/свойствами.
 
-### Антипаттерн
+### Антипаттерн (legacy-стиль)
 
 ```php
 <?php
+// На каждом элементе отдельные обращения к БД
+$items = [];
 $res = CIBlockElement::GetList([], ['IBLOCK_ID' => $iblockId, 'ACTIVE' => 'Y'], false, ['nTopCount' => 100], ['ID', 'NAME']);
 while ($item = $res->Fetch()) {
+    $items[] = $item;
     $price = CPrice::GetBasePrice((int)$item['ID']);
-    $props = CIBlockElement::GetProperty($iblockId, (int)$item['ID']);
 }
 ```
 
 ### Корректный подход
 
-Сначала собираем ID, затем читаем связанные данные пакетно.
+В D7 собираем ID один раз и дочитываем связанные данные пакетно через ORM.
 
 ```php
 <?php
-$elementIds = [];
-$res = CIBlockElement::GetList([], ['IBLOCK_ID' => $iblockId, 'ACTIVE' => 'Y'], false, ['nTopCount' => 100], ['ID', 'NAME']);
-while ($row = $res->Fetch()) {
-    $elementIds[] = (int)$row['ID'];
-}
+use Bitrix\Catalog\PriceTable;
+use Bitrix\Iblock\ElementTable;
+use Bitrix\Iblock\ElementPropertyTable;
+
+$elements = ElementTable::getList([
+    'select' => ['ID', 'NAME', 'IBLOCK_ID'],
+    'filter' => ['=IBLOCK_ID' => $iblockId, '=ACTIVE' => 'Y'],
+    'order' => ['ID' => 'DESC'],
+    'limit' => 100,
+])->fetchAll();
+
+$elementIds = array_map(static fn(array $row): int => (int)$row['ID'], $elements);
+
+$priceRows = PriceTable::getList([
+    'select' => ['PRODUCT_ID', 'PRICE'],
+    'filter' => ['@PRODUCT_ID' => $elementIds, '=CATALOG_GROUP_ID' => 1],
+])->fetchAll();
 
 $priceMap = [];
-$priceRes = CPrice::GetList([], ['PRODUCT_ID' => $elementIds, 'CATALOG_GROUP_ID' => 1]);
-while ($price = $priceRes->Fetch()) {
-    $priceMap[(int)$price['PRODUCT_ID']] = (float)$price['PRICE'];
+foreach ($priceRows as $row) {
+    $priceMap[(int)$row['PRODUCT_ID']] = (float)$row['PRICE'];
 }
 
-$propertyMap = [];
-CIBlockElement::GetPropertyValuesArray($propertyMap, $iblockId, ['ID' => $elementIds]);
+$propertyRows = ElementPropertyTable::getList([
+    'select' => ['IBLOCK_ELEMENT_ID', 'IBLOCK_PROPERTY_ID', 'VALUE'],
+    'filter' => ['@IBLOCK_ELEMENT_ID' => $elementIds],
+])->fetchAll();
 ```
 
 ### Проверка
@@ -90,7 +105,7 @@ CIBlockElement::GetPropertyValuesArray($propertyMap, $iblockId, ['ID' => $elemen
 
 ### Причина
 
-Используются `['*']` или пустой `select`, затем большая часть полей не используется в рендере.
+Используются `['*']` или пустой `select`, а в шаблоне реально нужны 5-7 полей.
 
 ### Корректный подход
 
@@ -98,9 +113,14 @@ CIBlockElement::GetPropertyValuesArray($propertyMap, $iblockId, ['ID' => $elemen
 
 ```php
 <?php
-$select = ['ID', 'IBLOCK_ID', 'NAME', 'CODE', 'DETAIL_PAGE_URL', 'PREVIEW_PICTURE'];
-$filter = ['IBLOCK_ID' => $iblockId, 'ACTIVE' => 'Y', 'SECTION_ID' => $sectionId];
-$res = CIBlockElement::GetList(['SORT' => 'ASC'], $filter, false, ['nPageSize' => 30], $select);
+use Bitrix\Iblock\ElementTable;
+
+$rows = ElementTable::getList([
+    'select' => ['ID', 'IBLOCK_ID', 'NAME', 'CODE', 'PREVIEW_PICTURE'],
+    'filter' => ['=IBLOCK_ID' => $iblockId, '=ACTIVE' => 'Y'],
+    'order' => ['SORT' => 'ASC', 'ID' => 'DESC'],
+    'limit' => 30,
+])->fetchAll();
 ```
 
 ### Проверка
@@ -117,7 +137,7 @@ $res = CIBlockElement::GetList(['SORT' => 'ASC'], $filter, false, ['nPageSize' =
 
 ### Причина
 
-Несколько слоёв (component, result_modifier, helper) повторно вызывают одинаковую выборку.
+Несколько слоёв (controller, service, view-model mapper) повторно вызывают одинаковую выборку.
 
 ### Корректный подход
 
@@ -149,7 +169,7 @@ final class ProductReadModel
 
 ---
 
-## 4) Бизнес-правила в `template.php`
+## 4) Бизнес-правила в слое представления
 
 ### Симптом
 
@@ -162,12 +182,12 @@ final class ProductReadModel
 ### Корректный подход
 
 1. Application/service слой готовит DTO/read model.
-2. `result_modifier.php` приводит данные к формату UI.
-3. `template.php` только отображает.
+2. Presentation-слой только маппит данные под экран.
+3. Шаблон/контроллер не ходит в БД и внешние API.
 
 ```php
 <?php
-// result_modifier.php
+// Presentation mapper
 /** @var array $arResult */
 $arResult['CARD_VIEW_MODELS'] = array_map(
     static fn(array $item): array => [
@@ -193,18 +213,19 @@ $arResult['CARD_VIEW_MODELS'] = array_map(
 
 ### Корректный подход
 
-- Для чтения данных используем `CPHPCache`.
+- Для чтения данных используем `\Bitrix\Main\Data\Cache`.
 - Для согласованности с инфоблоками — tagged cache.
 - Ключ кэша включает только значимые параметры (не весь request).
 
 ```php
 <?php
 use Bitrix\Main\Application;
+use Bitrix\Main\Data\Cache;
 
 $cacheTtl = 1800;
 $cachePath = '/catalog/list/';
 $cacheId = 'catalog:' . md5(implode('|', [$iblockId, $sectionId, $page, $sortField, $sortOrder]));
-$cache = new CPHPCache();
+$cache = Cache::createInstance();
 
 if ($cache->InitCache($cacheTtl, $cacheId, $cachePath)) {
     $result = $cache->GetVars();
@@ -240,9 +261,17 @@ if ($cache->InitCache($cacheTtl, $cacheId, $cachePath)) {
 
 ```php
 <?php
-$sort = ['SORT' => 'ASC', 'ID' => 'DESC']; // стабильная сортировка
-$navParams = ['nPageSize' => 30, 'iNumPage' => $currentPage];
-$res = CIBlockElement::GetList($sort, $filter, false, $navParams, $select);
+use Bitrix\Iblock\ElementTable;
+use Bitrix\Main\ORM\Query\Query;
+
+$query = ElementTable::query()
+    ->setSelect(['ID', 'NAME', 'SORT'])
+    ->setFilter(['=IBLOCK_ID' => $iblockId, '=ACTIVE' => 'Y'])
+    ->setOrder(['SORT' => 'ASC', 'ID' => 'DESC'])
+    ->setOffset(($page - 1) * 30)
+    ->setLimit(30);
+
+$rows = $query->fetchAll();
 ```
 
 ---
@@ -275,7 +304,7 @@ if ($status !== 200 || $response === false) {
 }
 ```
 
-Для тяжёлых задач (массовая синхронизация) переводим обработку в фон: агенты, cron, воркеры.
+Для тяжёлых задач (массовая синхронизация) переводим обработку в фон: cron/очереди/воркеры. Агенты в Bitrix подойдут только для лёгких и контролируемых задач.
 
 ---
 
@@ -371,8 +400,9 @@ ON b_iblock_element_property (IBLOCK_PROPERTY_ID, VALUE_NUM);
 
 ## Вывод
 
-Производительность в Bitrix — это управляемый инженерный процесс.  
-Когда есть измерения, приоритизация узких мест и корректные паттерны чтения/кэширования, ускорение получается предсказуемым и повторяемым.
+Производительность в Bitrix это не история про «ускорить любой ценой».  
+Это спокойная инженерная рутина: измерили, устранили узкое место, подтвердили результат цифрами.  
+Так команда не спорит «по ощущениям», а движется по фактам.
 
 ---
 
