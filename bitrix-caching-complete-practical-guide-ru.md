@@ -681,3 +681,10 @@ function getCatalogBlockSafe(array $filter): array
 ## Ключевые слова
 
 `1c-bitrix`, `bitrix`, `кеширование битрикс`, `bitrix cache`, `cpHPCache`, `Bitrix\Main\Data\Cache`, `managed cache`, `tagged cache`, `orm cache`, `StartResultCache`, `композитный сайт`, `инвалидация кеша`, `bitrix performance`
+
+---
+
+## Автор и контакты
+
+- Telegram: [@murad_pro_it](https://t.me/murad_pro_it)
+- Instagram: [@murad__it](https://www.instagram.com/murad__it/)
