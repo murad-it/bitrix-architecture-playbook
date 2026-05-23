@@ -18,6 +18,7 @@
 
 ### 2) Производительность и диагностика
 - [Производительность 1C-Битрикс на практике: 10 системных ошибок и как их устранять](./bitrix-performance-optimization-10-mistakes-practical-guide-ru.md)
+- [D7 ORM в 1C-Битрикс без иллюзий: как писать быстрые запросы, а не красивый тормоз](./bitrix-d7-orm-performance-runtime-relations-practical-guide-ru.md)
 
 ## Подход в статьях
 
